@@ -1,0 +1,222 @@
+import java.util.ArrayList;
+
+public class Member extends User {
+
+    private double balance;
+    private ArrayList<String> waitList;
+    private ArrayList<CheckoutItem> checkOutList;
+
+    public Member(String name, Library library) {
+        super(name, library);
+        balance = 0.0;
+        waitList = new ArrayList<>();
+        checkOutList = new ArrayList<>();
+    }
+
+
+    public double getBalance() {
+        return balance;
+    }
+
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+
+    @Override
+    public void menu() throws LibraryIOException {
+        int option;
+
+        try {
+            do {
+                IOUtility.printMemberMenu();
+                option = IOUtility.requestOption();
+
+                switch (option) {
+                    case IOUtility.REQUEST_BOOK_OPT:
+                        requestBook();
+                        break;
+
+                    case IOUtility.RETURN_BOOK_OPT:
+                        returnBook();
+                        break;
+
+                    case IOUtility.EXTEND_DATE_OPT:
+                        extendDate();
+                        break;
+                }
+            } while (option != IOUtility.EXIT_OPT);
+
+        } catch (LibraryIOException e) {
+            System.out.println(getName() + ", goodbye!\n");
+            throw e;
+        }
+
+        System.out.println(getName() + ", goodbye!\n");
+    }
+
+    /**
+     * Performs Login for this user.
+     * It does the following:
+     * - Automatically add a 50 cents penalty per day for every book that is not returned on time.
+     * - Show a message to the user if there is a book due within the next 2 days or is already overdue.
+     * - If the user is on the waitlist for a book, the system will show a message to the user if
+     * the book has become available. The user can then check-out the book, if they want,
+     * or remove themselves from the waitlist.
+     */
+    @Override
+    public void login() {
+        System.out.println(getName() + ", welcome to the library!");
+
+        /* Calculate penalty */
+        double penalty = 0;
+        for (CheckoutItem item : checkOutList) {
+            penalty += item.calculatePenalty(getLastLogin(), getLibrary().getDate());
+        }
+        balance += penalty;
+
+        if (penalty > 0) {
+            System.out.printf("You got a $%.2f penalty\n", penalty);
+        }
+
+        System.out.printf("Balance: $%.2f\n", getBalance());
+
+        /* Show warnings */
+        for (CheckoutItem item : checkOutList) {
+            if (item.isWarningRequired(getLibrary().getDate())) {
+                System.out.println(item);
+            }
+        }
+
+        /*
+         Check wait list
+         use a while loop to safely delete list entries in a loop
+        */
+        int i = 0;
+        while (i < waitList.size()) {
+            Book book = getLibrary().findBook(waitList.get(i));
+            if (book == null) {
+                waitList.remove(i);
+            } else {
+                if (book.isAvailable()) {
+                    System.out.println("The book \"" + book.getTitle() + "\" becomes available.");
+                    if (IOUtility.askYesNo("Do you want to checkout the book (Y/n)?: ")) {
+                        addBookToCheckoutList(book);
+                    }
+                    waitList.remove(i);
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        setLastLogin(getLibrary().getDate());
+    }
+
+
+    public void requestBook() throws LibraryIOException {
+        String title = IOUtility.requestBookTitle();
+        Book book = getLibrary().findBook(title);
+        if (book == null) {
+            System.out.println("Sorry, no such book was found.");
+        } else {
+            if (findBookInWaitList(book.getTitle()) != null) {
+                System.out.println("Sorry, the book is already on your wait list.");
+            } else if (findBookInCheckoutList(book.getTitle()) != null) {
+                System.out.println("Sorry, the book is already on your checkout list.");
+            } else {
+                if (book.checkOut()) {
+                    addBookToCheckoutList(book);
+                } else {
+                    addBookToWaitList(book);
+                }
+            }
+        }
+    }
+
+
+    public void returnBook() throws LibraryIOException {
+        String title = IOUtility.requestBookTitle();
+        Book book = findBookInCheckoutList(title);
+        if (book == null) {
+            System.out.println("Sorry, no such book was found.");
+        } else {
+            book.checkIn();
+            removeBookFromCheckoutList(title);
+        }
+    }
+
+
+    public void extendDate() throws LibraryIOException {
+        String title = IOUtility.requestBookTitle();
+        CheckoutItem item = findCheckoutItem(title);
+        if (item == null) {
+            System.out.println("Sorry, no such book was found.");
+        } else {
+            Book book = getLibrary().findBook(item.getTitle());
+            if (getLibrary().isBookInWaitList(book)) {
+                System.out.println("Sorry, but other members are waiting for this book.");
+            } else {
+                if (item.extendDate()) {
+                    System.out.println("The date has been extended for " + Library.CHECKOUT_TIME + " days.");
+                } else {
+                    System.out.println("Sorry, but you have already extended the date.");
+                }
+            }
+        }
+    }
+
+    public boolean isBookInWaitList(String title) {
+        return findBookInWaitList(title) != null;
+    }
+
+
+    private void addBookToWaitList(Book book) {
+        waitList.add(book.getTitle());
+        System.out.println("The book added to wait list.");
+    }
+
+
+    private Book findBookInWaitList(String title) {
+        for (String item : waitList) {
+            if (item.equalsIgnoreCase(title)) {
+                return getLibrary().findBook(title);
+            }
+        }
+        return null;
+    }
+
+
+    private void addBookToCheckoutList(Book book) {
+        checkOutList.add(new CheckoutItem(book.getTitle(), getLibrary().getDate()));
+        System.out.println("The book added to checkout list.");
+    }
+
+
+    private CheckoutItem findCheckoutItem(String title) {
+        for (CheckoutItem item : checkOutList) {
+            if (item.getTitle().equalsIgnoreCase(title)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+
+    private Book findBookInCheckoutList(String title) {
+        CheckoutItem item = findCheckoutItem(title);
+        if (item != null) {
+            return getLibrary().findBook(title);
+        }
+        return null;
+    }
+
+
+    private void removeBookFromCheckoutList(String title) {
+        CheckoutItem item = findCheckoutItem(title);
+        if (item != null) {
+            checkOutList.remove(item);
+        }
+    }
+}
