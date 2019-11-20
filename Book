@@ -1,0 +1,91 @@
+public class Book {
+
+    private String title;
+    private String description;
+    private String location;
+    private int numCopies;
+    private int numAvailableCopies;
+
+
+    public Book(String title, String description, int numCopies, String location) {
+        this.title = title;
+        this.description = description;
+        this.location = location;
+        this.numCopies = numCopies;
+        this.numAvailableCopies = numCopies;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
+    public int getNumCopies() {
+        return numCopies;
+    }
+
+    public void setNumCopies(int numCopies) {
+        int delta = numCopies - this.numCopies;
+        this.numCopies = numCopies;
+        this.numAvailableCopies += delta;
+    }
+
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+
+
+    public boolean isAvailable() {
+        return numAvailableCopies > 0;
+    }
+
+    /**
+     * Checkout this book (decrease number of available copies by 1 if this book is available)
+     *
+     * @return True if this book was available
+     */
+    public boolean checkOut() {
+        if (numAvailableCopies > 0) {
+            --numAvailableCopies;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check-in this book (increase number of available copies by 1)
+     */
+    public void checkIn() {
+        numAvailableCopies++;
+    }
+
+    /**
+     * Convert to string as "TITLE; DESCRIPTION; LOCATION; TOTAL(AVAILABLE)"
+     *
+     * @return String representation of this book
+     */
+    @Override
+    public String toString() {
+        return title + "; " + description + "; " + location + "; " + numCopies + "(" + numAvailableCopies + ")";
+    }
+}
