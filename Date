@@ -1,0 +1,70 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+public class Date {
+
+    private static String DATE_FORMAT = "dd/MM/yyyy";
+    public static final long MS_IN_ONE_DAY = 1000 * 60 * 60 * 24;
+    private java.util.Date date;
+
+    protected Date(java.util.Date date) {
+        this.date = date;
+    }
+
+
+    public java.util.Date getDate() {
+        return date;
+    }
+
+    /**
+     * Add a number of days and return new Date object
+     * @param days A number of days
+     * @return New Date
+     */
+    public Date add(int days) {
+        long time = date.getTime() + days * MS_IN_ONE_DAY;
+        return new Date(new java.util.Date(time));
+    }
+
+
+
+    public int diff(Date date) {
+        long time = this.date.getTime() - date.getDate().getTime();
+        int days = (int) (time / MS_IN_ONE_DAY);
+        return days;
+    }
+
+
+    // Tests if this date is before the specified date.
+
+    public boolean before(Date date) {
+        return this.date.before(date.getDate());
+    }
+
+
+    // Tests if this date is after the specified date.
+
+    public boolean after(Date date) {
+        return this.date.after(date.getDate());
+    }
+
+    /**
+     * Converts this Date object to a String of the form: dd/MM/yyyy
+     * @return a string
+     */
+    @Override
+    public String toString() {
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Parse date in form "dd/MM/yyyy" from a string s
+     * @param s a string
+     * @return A new Date object
+     * @throws ParseException
+     */
+    public static Date parseDate(String s) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        return new Date(sdf.parse(s));
+    }
+}
