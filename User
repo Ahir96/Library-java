@@ -1,0 +1,48 @@
+public abstract class User {
+    /**
+     * Reference to the Library (to access non-static library methods)
+     */
+    private final LibraryInterface library;
+
+    private String name;
+
+    /**
+     * Store last login date (for the correct calculation of the penalty)
+     */
+    private Date lastLogin;
+
+
+    public User(String name, LibraryInterface library) {
+        this.name = name;
+        this.library = library;
+        this.lastLogin = library.getDate();
+    }
+
+    /**
+     * @return Reference to the Library
+     */
+    public final LibraryInterface getLibrary() {
+        return library;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public final Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public final void setLastLogin(Date lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    /**
+     * Derived classes must implement this to handle user commands.
+     *
+     * @throws LibraryIOException
+     */
+    public abstract void menu() throws LibraryIOException;
+
+    public abstract void login();
+}
