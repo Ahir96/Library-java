@@ -1,0 +1,110 @@
+import java.util.ArrayList;
+
+public class Library implements LibraryInterface {
+
+    public static final int CHECKOUT_TIME = 14;
+    public static final double PENALTY = 0.5;
+
+    private Date date;
+    private ArrayList<User> users;
+    private ArrayList<Book> books;
+
+    public Library() {
+        users = new ArrayList<>();
+        books = new ArrayList<>();
+    }
+
+
+    //It can be interrupted at any time by pressing Ctrl-D.
+    public void run() {
+        try {
+            while (true) {
+                this.date = IOUtility.requestDate();
+                User user = getUser();
+                if (user != null) {
+                    user.login();
+                    user.menu();
+                }
+            }
+        } catch (LibraryIOException e) {
+        }
+
+        System.out.println("Goodbye!");
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+
+    @Override
+    public User findUser(String name) {
+        for (User user : users) {
+            if (user.getName().equals(name)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public Book findBook(String title) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public boolean isBookInWaitList(Book book) {
+        for (User user : users) {
+            if (user instanceof Member) {
+                if (((Member) user).isBookInWaitList(book.getTitle())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public void addBook(Book book) {
+        books.add(book);
+    }
+
+
+    @Override
+    public void addUser(User user) {
+        users.add(user);
+    }
+
+
+    //Asks username and either returns an existing user or creates and returns a new user.
+    private User getUser() throws LibraryIOException {
+        String username = IOUtility.requestUsername();
+        User user = findUser(username);
+        // Check if that user exists
+        if (user == null) {
+            // If user does not exist then create new user
+
+            UserType type = IOUtility.requestUserType();
+            if (type == UserType.STAFF) {
+                user = new Staff(username, this);
+            } else if (type == UserType.MEMBER) {
+                user = new Member(username,this);
+            }
+            // Add new user into user list
+            addUser(user);
+        }
+        return user;
+    }
+}
