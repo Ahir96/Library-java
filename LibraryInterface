@@ -1,0 +1,10 @@
+public interface LibraryInterface {
+
+    Date getDate();
+    void setDate(Date date);
+    Book findBook(String title);
+    void addBook(Book book);
+    User findUser(String name);
+    void addUser(User user);
+    boolean isBookInWaitList(Book book);
+}
