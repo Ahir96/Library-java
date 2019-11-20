@@ -1,0 +1,78 @@
+public class CheckoutItem {
+
+    private String title;
+    private Date date;
+    private boolean isExtended;
+
+    public CheckoutItem(String title, Date date) {
+        this.title = title;
+        this.date = date;
+        this.isExtended = false;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public int getElapsedTime(Date now) {
+        return now.diff(date);
+    }
+
+    public boolean isOverdue(Date now) {
+        if (!isExtended && getElapsedTime(now) > Library.CHECKOUT_TIME) {
+            return true;
+        }
+        return isExtended && getElapsedTime(now) > 2 * Library.CHECKOUT_TIME;
+    }
+
+    /**
+     * Checks if book due within the next 2 days or is already overdue.
+     * @param now Current date
+     * @return True if book is due within the next 2 days or is already overdue.
+     */
+    public boolean isWarningRequired(Date now) {
+        if (!isExtended && getElapsedTime(now) >= Library.CHECKOUT_TIME - 2) {
+            return true;
+        }
+        return isExtended && getElapsedTime(now) >= 2 * Library.CHECKOUT_TIME - 2;
+    }
+
+
+    public double calculatePenalty(Date last, Date now) {
+        double penalty = 0.0;
+        if (isOverdue(now)) {
+            int days = now.diff(last);
+            if (last.before(getDueDate())) {
+                days--;
+            }
+            penalty = days * Library.PENALTY;
+        }
+        return penalty;
+    }
+
+    public Date getDueDate() {
+        int days = Library.CHECKOUT_TIME;
+        if (isExtended) {
+            days += Library.CHECKOUT_TIME;
+        }
+        return date.add(days);
+    }
+
+    public boolean extendDate() {
+        if (isExtended) {
+            return false;
+        }
+        isExtended = true;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        String s = title + ": Due " + getDueDate();
+        return s;
+    }
+}
