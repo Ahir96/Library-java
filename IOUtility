@@ -1,0 +1,191 @@
+import java.text.ParseException;
+import java.util.Scanner;
+
+public class IOUtility {
+
+    /* Constants for menu options */
+
+    public static final int ADD_BOOK_OPT = 1;
+    public static final int UPDATE_BOOK_OPT = 2;
+    public static final int PAY_PEN_OPT = 3;
+    public static final int REQUEST_BOOK_OPT = 1;
+    public static final int RETURN_BOOK_OPT = 2;
+    public static final int EXTEND_DATE_OPT = 3;
+    public static final int EXIT_OPT = 0;
+
+
+    public static String requestNonEmptyString(String prompt) throws LibraryIOException {
+        String s = "";
+        try {
+            Scanner sc = new Scanner(System.in);
+            while (s.isEmpty()) {
+                System.out.print(prompt);
+                s = sc.nextLine();
+            }
+        } catch (Exception e) {
+            throw new LibraryIOException(e.getMessage());
+        }
+        return s;
+    }
+
+
+     /* Displays prompt and takes a string from user. */
+
+    public static String requestString(String prompt) throws LibraryIOException {
+        String s;
+        try {
+            Scanner sc = new Scanner(System.in);
+            System.out.print(prompt);
+            s = sc.nextLine();
+        } catch (Exception e) {
+            throw new LibraryIOException(e.getMessage());
+        }
+        return s;
+    }
+
+
+     /*
+      Displays prompt and takes an integer from user.
+      Re-prompt if user enter an invalid integer.
+     */
+    public static int requestInteger(String prompt) throws LibraryIOException {
+        String s;
+        int i = -1;
+        try {
+            Scanner sc = new Scanner(System.in);
+            while (i == -1) {
+                System.out.print(prompt);
+                s = sc.nextLine();
+                try {
+                    i = Integer.parseInt(s);
+                } catch (NumberFormatException e) {
+                }
+            }
+        } catch (Exception e) {
+            throw new LibraryIOException(e.getMessage());
+        }
+        return i;
+    }
+
+
+    public static int requestOption() throws LibraryIOException {
+        return requestInteger("Enter your option: ");
+    }
+
+
+    public static String requestUsername() throws LibraryIOException {
+        return requestNonEmptyString("Enter username: ");
+    }
+
+    /*
+     Displays prompt and takes an user type from user.
+     Re-prompt if user enter an invalid user type.
+    */
+    public static UserType requestUserType() throws LibraryIOException {
+        int opt;
+        do {
+            opt = requestInteger("Enter user type (1 - Staff, 2 - Member): ");
+        } while (opt != 1 && opt != 2);
+        UserType type = opt == 1 ? UserType.STAFF : UserType.MEMBER;
+        return type;
+    }
+
+
+    public static String requestBookTitle() throws LibraryIOException {
+        return requestNonEmptyString("Enter book title: ");
+    }
+
+
+    public static String requestBookDescription() throws LibraryIOException {
+        return requestNonEmptyString("Enter book description: ");
+    }
+
+
+    public static String requestBookLocation() throws LibraryIOException {
+        return requestNonEmptyString("Enter book location: ");
+    }
+
+
+    public static int requestBookNumCopies() throws LibraryIOException {
+        return requestInteger("Enter number of book copies: ");
+    }
+
+
+    public static String requestNewBookTitle() throws LibraryIOException {
+        return requestString("Enter new book title (ENTER to skip): ");
+    }
+
+
+    public static String requestNewBookDescription() throws LibraryIOException {
+        return requestString("Enter book description (ENTER to skip): ");
+    }
+
+
+    public static String requestNewBookLocation() throws LibraryIOException {
+        return requestString("Enter book location (ENTER to skip): ");
+    }
+
+
+    public static int requestNewBookNumCopies() throws LibraryIOException {
+        String s = requestString("Enter number of book copies (ENTER to skip): ");
+        int num;
+        try {
+            num = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            num = -1;
+        }
+        return num;
+    }
+
+     /*
+     Displays prompt and takes a date in format DD/MM/YYYY from the user.
+     Re-prompt if user enter an invalid date.
+     */
+    public static Date requestDate() throws LibraryIOException {
+        Date date = null;
+        while (date == null) {
+            String s = requestString("Enter date as DD/MM/YYYY: ");
+            try {
+                date = Date.parseDate(s);
+            } catch (ParseException e) {
+            }
+        }
+        return date;
+    }
+
+    /**
+     * Displays prompt and takes answer as "Yes" or "No"
+     * @param prompt User prompt
+     * @return True of any input except string that starts with "N" (ignore case)
+     */
+    public static boolean askYesNo(String prompt) {
+        System.out.print(prompt);
+        Scanner sc = new Scanner(System.in);
+        String answer = sc.nextLine();
+        if (answer.isEmpty() || (!answer.startsWith("n") && !answer.startsWith("N"))) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /* Prints menu for a stuff user */
+    public static void printStaffMenu() {
+        System.out.println();
+        System.out.println("1. Add new book");
+        System.out.println("2. Update existing book");
+        System.out.println("3. Pay penalties for a user");
+        System.out.println("0. Exit");
+        System.out.println();
+    }
+
+    /* Prints menu for a member user */
+    public static void printMemberMenu() {
+        System.out.println();
+        System.out.println("1. Request book");
+        System.out.println("2. Return book");
+        System.out.println("3. Extend date");
+        System.out.println("0. Exit");
+        System.out.println();
+    }
+}
