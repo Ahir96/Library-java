@@ -1,0 +1,9 @@
+public class LibraryIOException extends Exception {
+    public LibraryIOException() {
+        super();
+    }
+
+    public LibraryIOException(String msg) {
+        super(msg);
+    }
+}
