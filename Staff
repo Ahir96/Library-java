@@ -1,0 +1,107 @@
+public class Staff extends User{
+
+    public Staff(String name, Library library) {
+        super(name, library);
+    }
+
+    @Override
+    public void menu() throws LibraryIOException {
+        int option;
+
+        try {
+            do {
+                IOUtility.printStaffMenu();
+                option = IOUtility.requestOption();
+
+                switch (option) {
+                    case IOUtility.ADD_BOOK_OPT:
+                        addBook();
+                        break;
+
+                    case IOUtility.UPDATE_BOOK_OPT:
+                        updateBook();
+                        break;
+
+                    case IOUtility.PAY_PEN_OPT:
+                        payPenalty();
+                        break;
+                }
+            } while (option != IOUtility.EXIT_OPT);
+
+        } catch (LibraryIOException e) {
+            throw e;
+        }
+
+        System.out.println();
+    }
+
+
+    @Override
+    public void login() {
+        setLastLogin(getLibrary().getDate());
+    }
+
+
+    public void addBook() throws LibraryIOException {
+        String title = IOUtility.requestBookTitle();
+        Book book = getLibrary().findBook(title);
+        if (book != null) {
+            System.out.println("Sorry, such a book already exists.");
+        } else {
+            String description = IOUtility.requestBookDescription();
+            String location = IOUtility.requestBookLocation();
+            int numCopies = IOUtility.requestBookNumCopies();
+
+            book = new Book(title, description, numCopies, location);
+            getLibrary().addBook(book);
+            System.out.println(book);
+        }
+
+    }
+
+
+    public void updateBook() throws LibraryIOException {
+        String title = IOUtility.requestBookTitle();
+
+        Book book = getLibrary().findBook(title);
+        if (book == null) {
+            System.out.println("Sorry, no such book was found.");
+        } else {
+            System.out.println(book);
+
+            title = IOUtility.requestNewBookTitle();
+            if (!title.isEmpty()) {
+                book.setTitle(title);
+            }
+
+            String description = IOUtility.requestNewBookDescription();
+            if (!description.isEmpty()) {
+                book.setDescription(description);
+            }
+
+            String location = IOUtility.requestNewBookLocation();
+            if (!location.isEmpty()) {
+                book.setLocation(location);
+            }
+
+            int numCopies = IOUtility.requestNewBookNumCopies();
+            if (numCopies != -1) {
+                book.setNumCopies(numCopies);
+            }
+
+            System.out.println(book);
+        }
+    }
+
+
+    public void payPenalty() throws LibraryIOException {
+        String username = IOUtility.requestUsername();
+        User user = getLibrary().findUser(username);
+        if (user instanceof Member) {
+            ((Member) user).setBalance(0.0);
+        } else {
+            System.out.println("Sorry, no such member was found.");
+        }
+    }
+
+}
